@@ -6,8 +6,13 @@
         <base-button @click="loadExperiences">Load Submitted Experiences</base-button>
       </div>
       <p v-if="isLoading">Loading...</p>
-      <p v-else-if="!isLoading && (!results || results.length === 0)">No stored expericences found. Start adding some survey</p>
-      <ul v-else-if="!isLoading && results && results.length > 0">
+      <p v-else-if="!isLoading && error">
+        {{ error }}
+      </p>
+      <p
+        v-else-if="!isLoading && (!results || results.length === 0)"
+      >No stored expericences found. Start adding some survey</p>
+      <ul v-else>
         <survey-result
           v-for="result in results"
           :key="result.id"
@@ -29,12 +34,14 @@ export default {
   data() {
     return {
       results: [],
-      isLoading: false
+      isLoading: false,
+      error: null
     };
   },
   methods: {
     loadExperiences() {
       this.isLoading = true;
+      this.error = null;
       fetch('https://vue-http-demo-17cd3-default-rtdb.asia-southeast1.firebasedatabase.app/surveys.json')
       .then((response) => {
           if (response.ok) {
@@ -52,6 +59,11 @@ export default {
           });
         }
         this.results = results;
+      })
+      .catch((error) => {
+        console.log(error);
+        this.isLoading = false;
+        this.error = 'Failed to fetch data - please try again later.';
       });
     },
   },
